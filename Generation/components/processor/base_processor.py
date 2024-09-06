@@ -17,3 +17,8 @@ class Processor(ABC):
             This method is abstract and must be implemented by any subclass of Processor.
         """
         pass
+
+
+class TranslationProcessor(Processor):
+    def process(self, input: str, **kwargs) -> str:
+        return input

@@ -1,5 +1,5 @@
 from openai import OpenAI
-from base_llm import LLM
+from .base_llm import LLM
 
 pricing_option = {
     "gpt-3.5-turbo": (0.5 / 1e6, 1.5 / 1e6),

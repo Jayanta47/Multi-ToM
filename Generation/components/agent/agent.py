@@ -12,17 +12,18 @@ class Agent(BaseAgent):
         processor (Processor): The processor to use
     """
 
-    def __init__(self, llm: LLM, processor: Processor, prompter: BasePromptManager):
+    def __init__(self, llm: LLM, processor: Processor, prompter: BasePromptManager, **kwargs):
         super().__init__()
         self.llm = llm
         self.processor = processor
         self.prompter = prompter
+        self.agent_serial = kwargs.get("agent_serial", 0)
 
     def set_config(self, **kwargs):
         raise NotImplementedError
 
     def invoke(self, user_prompt: str):
-        prompt = self.prompter.create_prompt(user_query=user_prompt)
+        prompt = self.prompter.create_prompt(user_query=user_prompt, agent_serial=self.agent_serial)
         while True:
             model_response = self.llm.create_response(prompt)
             refined_output, is_satisfied = self.processor.process(
