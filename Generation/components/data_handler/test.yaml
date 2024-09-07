@@ -1,5 +1,6 @@
-model: GPT-40
+model: GPT-4o
 task: Translation
 source_language: English
 target_language: French
-storage_folder_path: Result/
+storage_folder_path: /home/jayanta/Documents/ToM_Study/Multi-ToM/Generation/components/data_handler/Result
+data_path: /home/jayanta/Documents/ToM_Study/Multi-ToM/Data/RefinedData/data.csv

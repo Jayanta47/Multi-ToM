@@ -12,22 +12,32 @@ class Agent(BaseAgent):
         processor (Processor): The processor to use
     """
 
-    def __init__(self, llm: LLM, processor: Processor, prompter: BasePromptManager, **kwargs):
+    def __init__(
+        self, llm: LLM, processor: Processor, prompter: BasePromptManager, **kwargs
+    ):
         super().__init__()
         self.llm = llm
         self.processor = processor
         self.prompter = prompter
         self.agent_serial = kwargs.get("agent_serial", 0)
 
-    def set_config(self, **kwargs):
-        raise NotImplementedError
+    def invoke(self, input: dict | str):
+        user_prompt = self.processor.process(
+            input=input, agent_serial=self.agent_serial, task_type="pre-processing"
+        )
+        input["user_prompt"] = user_prompt
+        self.processor.save_current_user_input(input)
 
-    def invoke(self, user_prompt: str):
-        prompt = self.prompter.create_prompt(user_query=user_prompt, agent_serial=self.agent_serial)
-        while True:
-            model_response = self.llm.create_response(prompt)
-            refined_output, is_satisfied = self.processor.process(
-                model_response["content"]
-            )
-            if is_satisfied:
-                return refined_output
+        prompt = self.prompter.create_prompt(
+            user_query=user_prompt, agent_serial=self.agent_serial
+        )
+
+        model_response = self.llm.create_response(prompt)
+
+        refined_output = self.processor.process(
+            input=model_response,
+            agent_serial=self.agent_serial,
+            task_type="post-processing",
+        )
+
+        return refined_output

@@ -3,7 +3,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from components.data_handler.config_reader import ConfigReader
+from .config_reader import ConfigReader
 
 
 def sanitize_model_name(model_name: str):
@@ -18,7 +18,7 @@ class TranslationDataHandler:
         self.__setup_result_configurations()
 
     def get_attribute(self, attribute):
-        return self.config[attribute]
+        return self.config_reader.get_attribute(attribute)
 
     def __is_datapoint_eligible(self, index):
         index_folder_path = os.path.join(self.model_folder_path, str(index))
@@ -27,7 +27,7 @@ class TranslationDataHandler:
     def __create_valid_data_points(self) -> dict:
         import pandas as pd
 
-        refined_data_path = os.path.join("Data", "RefinedData", "data.csv")
+        refined_data_path = self.config_reader.get_attribute("data_path")
         refined_data = pd.read_csv(refined_data_path)
 
         mask = [self.__is_datapoint_eligible(index) for index in refined_data.index]
@@ -86,7 +86,8 @@ class TranslationDataHandler:
 
 
 if __name__ == "__main__":
-    data_handler = TranslationDataHandler(config="test.yaml")
+
+    data_handler = TranslationDataHandler(config="./test.yaml")
     print(data_handler.get_attribute("model"))
     print(data_handler.get_attribute("task"))
     print(data_handler.get_attribute("source_language"))
@@ -94,6 +95,12 @@ if __name__ == "__main__":
     print(data_handler.get_attribute("storage_folder_path"))
     print(data_handler.model_folder_path)
 
-    for data_point in data_handler.return_data_point():
+    for data_point in data_handler.return_data_point(2):
         print(data_point)
 
+    content = {
+        "first_response": "french translation",
+        "second_response": "english translation",
+    }
+
+    data_handler.save_data_point(0, content)

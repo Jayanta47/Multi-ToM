@@ -6,11 +6,5 @@ from components.prompt.prompt_manager import BasePromptManager
 
 class BaseAgent(ABC):
     @abstractmethod
-    def set_config(
-        self, llm: LLM, processor: Processor, prompter: BasePromptManager, **kwargs
-    ):
-        pass
-
-    @abstractmethod
-    def invoke(self, user_prompt: str):
+    def invoke(self, input: dict|str):
         pass
