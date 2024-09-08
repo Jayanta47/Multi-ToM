@@ -65,28 +65,36 @@ def executor(
     feedback_agent: Agent,
     refinement_agent: Agent,
 ):
-    for data_sample in data_handler.return_data_point():
+    for data_sample in data_handler.return_data_point(1):
         translator_response = translator_agent.invoke(input=data_sample)
 
         feedback_response = feedback_agent.invoke(input=translator_response)
 
         for _ in range(2):
-            if feedback_response["decision"] == "yes":
+            if feedback_response["status"] == "modify":
+                refinement_input = {
+                    "original_text": translator_response['prompt'],
+                    "translated_text": translator_response['response'],
+                    "feedback": feedback_response['response'],
+                }
                 refinement_response = refinement_agent.invoke(
-                    user_prompt=translator_response
+                    input=refinement_input
                 )
 
                 feedback_response = feedback_agent.invoke(
                     user_prompt=refinement_response
                 )
             else:
-                refinement_response = translator_response
+                refinement_response = {
+                    'response': feedback_response['response']
+                }
+                
                 break
 
         content = {
-            "translator_response": translator_response["content"],
-            "feedback_response": feedback_response["content"],
-            "refinement_response": refinement_response["content"],
+            "translator_response": translator_response["response"],
+            "feedback_response": feedback_response["response"],
+            "refinement_response": refinement_response['response'],
         }
 
         data_handler.save_data_point(index=data_sample["INDEX"], content=content)

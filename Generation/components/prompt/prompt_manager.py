@@ -9,6 +9,10 @@ class BasePromptManager(ABC):
         pass
 
     @abstractmethod
+    def correction_prompt(self, previous_prompt, model_response, **kwargs):
+        pass
+
+    @abstractmethod
     def create_prompt(self, user_query, **kwargs):
         pass
 
@@ -44,8 +48,17 @@ class TranslatorPromptManager(BasePromptManager):
             )
         )
         self.agents_sys_prompt.append(
-            SYSTEM_PROMPT_TRANS_AGENT_3.format(destination_language=target_language)
+            SYSTEM_PROMPT_TRANS_AGENT_3.format(
+                source_language=source_language, destination_language=target_language
+            )
         )
+
+        self.correction_prompt_list = [
+            CORRECTION_TEMPLATE_1,
+            CORRECTION_TEMPLATE_1,
+            CORRECTION_TEMPLATE_1,
+        ]
+
         assert num_agents <= len(
             self.agents_sys_prompt
         ), "Number of agents must be less than or equal to the number of system prompts"
@@ -63,7 +76,7 @@ class TranslatorPromptManager(BasePromptManager):
         assert agent_serial < len(self.agents_sys_prompt), "Invalid agent serial"
         self.agents_sys_prompt[agent_serial] = system_prompt
 
-    def create_prompt(self, user_query, **kwargs) -> list:    
+    def create_prompt(self, user_query, **kwargs) -> list:
         """
         Creates a prompt for the given agent.
 
@@ -82,3 +95,14 @@ class TranslatorPromptManager(BasePromptManager):
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_query},
         ]
+
+    def correction_prompt(self, previous_prompt, model_response, **kwargs):
+        agent_serial = kwargs.get("agent_serial")
+        correction_prompt = self.correction_prompt_list[agent_serial]
+        extension = [
+            {"role": "assistant", "content": model_response},
+            {"role": "user", "content": correction_prompt},
+        ]
+        previous_prompt.extend(extension)
+
+        return previous_prompt

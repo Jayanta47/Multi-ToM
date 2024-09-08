@@ -32,12 +32,22 @@ class Agent(BaseAgent):
             user_query=user_prompt, agent_serial=self.agent_serial
         )
 
-        model_response = self.llm.create_response(prompt)
+        for _ in range(2):
+            model_response = self.llm.create_response(prompt)
 
-        refined_output = self.processor.process(
-            input=model_response,
-            agent_serial=self.agent_serial,
-            task_type="post-processing",
-        )
+            refined_output = self.processor.process(
+                input=model_response,
+                agent_serial=self.agent_serial,
+                task_type="post-processing",
+            )
+
+            if refined_output["status"] == "success":
+                break
+
+            prompt = self.prompter.correction_prompt(
+                previous_prompt=prompt,
+                model_response=model_response["content"],
+                agent_serial=self.agent_serial,
+            )
 
         return refined_output

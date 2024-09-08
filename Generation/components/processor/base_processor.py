@@ -30,14 +30,30 @@ class TranslationProcessor(Processor):
         self.current_user_input = input
 
     def process_translator_output(self, input: dict):
+        if (
+            "###STORY" in input["content"]
+            and "###QUESTION" in input["content"]
+            and "###OPTION" in input["content"]
+        ):
+            status = "success"
+        else:
+            status = "incorrect"
+
         return {
             "prompt": self.current_user_input["user_prompt"],
             "response": input["content"],
-            "status": "success",
+            "status": status,
         }
 
-    def process_feedback_output(self, input: str):
-        return input
+    def process_feedback_output(self, input: dict):
+        message = input["content"]
+        if "###Quality" in message and "okay" in message.lower():
+            return {"response": "No Feedback", "status": "success"}
+        elif "###Feedback" in message:
+            feedback = message.split("###Feedback")[-1].strip().strip(":")
+            return {"response": feedback, "status": "modify"}
+
+        return {"status": "incorrect"}
 
     def process_refinement_output(self, input: str):
         return input
@@ -55,13 +71,17 @@ class TranslationProcessor(Processor):
         return user_prompt
 
     def process_feedback_input(self, input: str):
-        return REFINEMENT_TEMPLATE.format(
+        return FEEDBACK_TEMPLATE.format(
             original_text=input["prompt"],
             translated_text=input["response"],
         )
 
     def process_refinement_input(self, input: str):
-        return input
+        return REFINEMENT_TEMPLATE.format(
+            original_text=input["original_text"],
+            translated_text=input["translated_text"],
+            feedback=input["feedback"],
+        )
 
     def preprocess(self, input, agent_serial):
         if agent_serial == 0:
