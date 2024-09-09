@@ -101,6 +101,7 @@ def executor(
             "translator_response": translator_response["response"],
             "feedback_response": feedback_response["response"],
             "refinement_response": refinement_response["response"],
+            "original": translator_response['prompt']
         }
 
         logger.info(f"Saving data point: {data_sample['INDEX']}")
