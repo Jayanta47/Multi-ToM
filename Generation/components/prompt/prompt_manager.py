@@ -63,6 +63,8 @@ class TranslatorPromptManager(BasePromptManager):
             self.agents_sys_prompt
         ), "Number of agents must be less than or equal to the number of system prompts"
 
+        self.logger = logging.getLogger(__name__)
+
     def set_system_prompt(self, system_prompt: str, **kwargs):
         """
         Sets the system prompt for the given agent.
@@ -74,6 +76,7 @@ class TranslatorPromptManager(BasePromptManager):
         """
         agent_serial = kwargs.get("agent_serial")
         assert agent_serial < len(self.agents_sys_prompt), "Invalid agent serial"
+        self.logger.info(f"Setting system prompt for agent {agent_serial}")
         self.agents_sys_prompt[agent_serial] = system_prompt
 
     def create_prompt(self, user_query, **kwargs) -> list:
@@ -91,6 +94,7 @@ class TranslatorPromptManager(BasePromptManager):
         agent_serial = kwargs.get("agent_serial")
         assert agent_serial < len(self.agents_sys_prompt), "Invalid agent serial"
         system_prompt = self.agents_sys_prompt[agent_serial]
+        self.logger.info(f"Creating prompt for agent {agent_serial}")
         return [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_query},

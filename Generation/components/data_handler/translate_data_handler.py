@@ -79,7 +79,7 @@ class TranslationDataHandler:
             try:
                 with open(filepath, "w", encoding="utf-8") as file:
                     file.write(str(value))
-                    logger.info(f"Content saved to file: {filepath}\n")
+                    logger.info(f"Content saved to file: {filepath}")
             except Exception as e:
                 logger.error(f"Error occurred while writing to file: {e}\n")
                 pass  # Skip the operation if an error occurs

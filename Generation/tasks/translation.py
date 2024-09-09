@@ -1,6 +1,9 @@
 import os
 import sys
 import yaml
+import logging
+from datetime import datetime
+from tqdm import tqdm
 
 # include the file in python path
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -47,10 +50,8 @@ def create_agents(processor, prompter, **kwargs):
     return translator_agent, feedback_agent, refinement_agent
 
 
-def create_data_handler():
-    data_handler = TranslationDataHandler(
-        config="Generation/tasks/translation_config.yaml"
-    )
+def create_data_handler(config_file):
+    data_handler = TranslationDataHandler(config=config_file)
     return data_handler
 
 
@@ -64,52 +65,70 @@ def executor(
     translator_agent: Agent,
     feedback_agent: Agent,
     refinement_agent: Agent,
+    logger: logging.Logger,
 ):
-    for data_sample in data_handler.return_data_point(1):
+    logger.info("Starting execution")
+    for data_sample in tqdm(data_handler.return_data_point(1)):
+        logger.info(f"Processing data sample: {data_sample['INDEX']}")
         translator_response = translator_agent.invoke(input=data_sample)
+        logger.debug(f"Translator response: {translator_response}")
 
         feedback_response = feedback_agent.invoke(input=translator_response)
+        logger.debug(f"Feedback response: {feedback_response}")
 
         for _ in range(2):
             if feedback_response["status"] == "modify":
+                logger.info("REFINEMENT:required")
                 refinement_input = {
-                    "original_text": translator_response['prompt'],
-                    "translated_text": translator_response['response'],
-                    "feedback": feedback_response['response'],
+                    "original_text": translator_response["prompt"],
+                    "translated_text": translator_response["response"],
+                    "feedback": feedback_response["response"],
                 }
-                refinement_response = refinement_agent.invoke(
-                    input=refinement_input
-                )
+                refinement_response = refinement_agent.invoke(input=refinement_input)
+                logger.debug(f"Refinement response: {refinement_response}")
 
                 feedback_response = feedback_agent.invoke(
                     user_prompt=refinement_response
                 )
+                logger.debug(f"Feedback response after refinement: {feedback_response}")
             else:
-                refinement_response = {
-                    'response': feedback_response['response']
-                }
-                
+                logger.info("REFINEMENT: not required")
+                refinement_response = {"response": feedback_response["response"]}
+                logger.debug(f"Refinement response: {refinement_response}")
                 break
 
         content = {
             "translator_response": translator_response["response"],
             "feedback_response": feedback_response["response"],
-            "refinement_response": refinement_response['response'],
+            "refinement_response": refinement_response["response"],
         }
 
+        logger.info(f"Saving data point: {data_sample['INDEX']}")
         data_handler.save_data_point(index=data_sample["INDEX"], content=content)
+
+    logger.info("Execution completed")
 
 
 if __name__ == "__main__":
-    data_handler = create_data_handler()
+    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    log_folder = "logs"
+    if not os.path.exists(log_folder):
+        os.makedirs(log_folder)
 
+    log_file = os.path.join(log_folder, f"{current_time}.log")
+    logging.basicConfig(
+        filename=log_file,
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
+    logger = logging.getLogger(__name__)
+
+    data_handler = create_data_handler("Generation/tasks/translation_config.yaml")
     prompter = create_prompter(
         source_language=data_handler.get_attribute("source_language"),
         target_language=data_handler.get_attribute("target_language"),
     )
-
     processor = create_processor()
-
     translator_agent, feedback_agent, refinement_agent = create_agents(
         processor=processor,
         prompter=prompter,
@@ -117,4 +136,4 @@ if __name__ == "__main__":
         secondary_agent_llm=data_handler.get_attribute("secondary_model"),
     )
 
-    executor(data_handler, translator_agent, feedback_agent, refinement_agent)
+    executor(data_handler, translator_agent, feedback_agent, refinement_agent, logger)
