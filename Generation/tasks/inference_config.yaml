@@ -1,0 +1,5 @@
+language: French
+model: gpt-4o
+task: inference
+storage_folder_path: ./Results
+data_path: ./Data/RefinedData/data.csv

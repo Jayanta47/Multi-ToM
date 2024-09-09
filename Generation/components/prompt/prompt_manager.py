@@ -110,3 +110,47 @@ class TranslatorPromptManager(BasePromptManager):
         previous_prompt.extend(extension)
 
         return previous_prompt
+
+
+class InferencePromptManager(BasePromptManager):
+    """
+    A prompt manager for inference tasks.
+    """
+
+    def __init__(self, language: str):
+        """
+        Initialize the InferencePromptManager.
+        """
+        self.system_prompt = INFERENCE_PROMPT
+        self.language = language
+
+    def set_system_prompt(self, system_prompt: str, **kwargs):
+        """
+        Sets the system prompt for the given agent.
+
+        Args:
+            system_prompt (str): The system prompt to set.
+            **kwargs: Additional keyword arguments.
+                agent_serial (int): The serial number of the agent to set the prompt for.
+        """
+        self.system_prompt = system_prompt
+
+    def create_prompt(self, user_query, **kwargs) -> list:
+        """
+        Creates a prompt for the given agent.
+
+        Args:
+            user_query (str): The user query to generate a prompt for.
+            **kwargs: Additional keyword arguments.
+                agent_serial (int): The serial number of the agent to generate the prompt for.
+
+        Returns:
+            list: A prompt in the format of [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_query}].
+        """
+        return [
+            {"role": "system", "content": self.system_prompt},
+            {"role": "user", "content": user_query},
+        ]
+
+    def correction_prompt(self, previous_prompt, model_response, **kwargs):
+        raise NotImplementedError

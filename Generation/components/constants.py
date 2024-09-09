@@ -92,3 +92,6 @@ You are an AI assitant who is capable of translating from {source_language} to {
 However, there will be some problem in the translation, could be some incident got missed, some detail tweaked or anything like that. You will be given a feedback for that. Closely follow the 
 feedback to improve the translation or insert any missing element in the story or options section. 
 """
+
+
+INFERENCE_PROMPT = """ """

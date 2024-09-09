@@ -120,7 +120,7 @@ class TranslationProcessor(Processor):
         elif agent_serial == 2:
             return self.process_refinement_output(input)
 
-    def process(self, input: dict | str, **kwargs) -> str:
+    def process(self, input: dict | str, **kwargs):
         self.logger.info(
             "PROCESSOR: Processing input with task type %s", kwargs.get("task_type")
         )
@@ -130,3 +130,35 @@ class TranslationProcessor(Processor):
             return self.preprocess(input, agent_serial=agent_serial)
 
         return self.postprocess(input, agent_serial=agent_serial)
+
+
+class InferenceProcessor(Processor):
+    def __init__(self) -> None:
+        super().__init__()
+        self.current_user_input = None
+
+    def save_current_user_input(self, input: dict):
+        self.logger.info("PROCESSOR: Saving current user input")
+        self.current_user_input = input
+
+    def postprocess(self, input: dict | str):
+        self.logger.info("PROCESSOR: Postprocessing output")
+        # to be done
+        raise NotImplementedError
+
+    def preprocess(self, input):
+        # to be done
+        self.logger.info("PROCESSOR: Preprocessing input")
+        raise NotImplementedError
+
+    def process(self, input: dict | str, **kwargs):
+        self.logger.info(
+            "PROCESSOR: Processing input with task type %s", kwargs.get("task_type")
+        )
+        task_type = kwargs.get("task_type")
+        if task_type == "pre-processing":
+            return self.preprocess(input)
+
+        return self.postprocess(input)
+
+    
