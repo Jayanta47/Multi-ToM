@@ -38,9 +38,9 @@ class TranslationProcessor(Processor):
     def process_translator_output(self, input: dict):
         self.logger.info("PROCESSOR: Processing translator output")
         if (
-            "###STORY" in input["content"]
-            and "###QUESTION" in input["content"]
-            and "###OPTION" in input["content"]
+            "<STORY>" in input["content"]
+            and "<QUESTION>" in input["content"]
+            and "<OPTIONS>" in input["content"]
         ):
             status = "success"
         else:
@@ -75,13 +75,9 @@ class TranslationProcessor(Processor):
 
     def process_translator_input(self, input: dict) -> str:
         self.logger.info("PROCESSOR: Processing translator input")
-        user_prompt = TOMQA_TEMPLATE.format(
+        user_prompt = TOMQA_TEMPLATE_V2.format(
             story=input["STORY"],
-            question=input["QUESTION"],
-            option_a=input["OPTION-A"],
-            option_b=input["OPTION-B"],
-            option_c=input["OPTION-C"],
-            option_d=input["OPTION-D"],
+            query=input["QUERY"],
         )
 
         self.logger.info("PROCESSOR: Returning translator input")

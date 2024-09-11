@@ -66,42 +66,47 @@ def executor(
     feedback_agent: Agent,
     refinement_agent: Agent,
     logger: logging.Logger,
+    feedback_enabled: bool = False,
 ):
     logger.info("Starting execution")
-    for data_sample in tqdm(data_handler.return_data_point(1)):
+    for data_sample in tqdm(data_handler.return_data_point(20)):
         logger.info(f"Processing data sample: {data_sample['INDEX']}")
         translator_response = translator_agent.invoke(input=data_sample)
         logger.debug(f"Translator response: {translator_response}")
 
-        feedback_response = feedback_agent.invoke(input=translator_response)
-        logger.debug(f"Feedback response: {feedback_response}")
-
-        for _ in range(2):
-            if feedback_response["status"] == "modify":
-                logger.info("REFINEMENT:required")
-                refinement_input = {
-                    "original_text": translator_response["prompt"],
-                    "translated_text": translator_response["response"],
-                    "feedback": feedback_response["response"],
-                }
-                refinement_response = refinement_agent.invoke(input=refinement_input)
-                logger.debug(f"Refinement response: {refinement_response}")
-
-                feedback_response = feedback_agent.invoke(
-                    user_prompt=refinement_response
-                )
-                logger.debug(f"Feedback response after refinement: {feedback_response}")
-            else:
-                logger.info("REFINEMENT: not required")
-                refinement_response = {"response": feedback_response["response"]}
-                logger.debug(f"Refinement response: {refinement_response}")
-                break
-
         content = {
             "translator_response": translator_response["response"],
-            "feedback_response": feedback_response["response"],
-            "refinement_response": refinement_response["response"],
+            "original": translator_response["prompt"],
         }
+
+        if feedback_enabled:
+
+            feedback_response = feedback_agent.invoke(input=translator_response)
+            logger.debug(f"Feedback response: {feedback_response}")
+
+            for _ in range(2):
+                if feedback_response["status"] == "modify":
+                    logger.info("REFINEMENT:required")
+                    refinement_input = {
+                        "original_text": translator_response["prompt"],
+                        "translated_text": translator_response["response"],
+                        "feedback": feedback_response["response"],
+                    }
+                    refinement_response = refinement_agent.invoke(input=refinement_input)
+                    logger.debug(f"Refinement response: {refinement_response}")
+
+                    feedback_response = feedback_agent.invoke(
+                        user_prompt=refinement_response
+                    )
+                    logger.debug(f"Feedback response after refinement: {feedback_response}")
+                else:
+                    logger.info("REFINEMENT: not required")
+                    refinement_response = {"response": feedback_response["response"]}
+                    logger.debug(f"Refinement response: {refinement_response}")
+                    break
+
+            content['feedback_response'] = feedback_response['response']
+            content['refinement_response'] = refinement_response['response']
 
         logger.info(f"Saving data point: {data_sample['INDEX']}")
         data_handler.save_data_point(index=data_sample["INDEX"], content=content)

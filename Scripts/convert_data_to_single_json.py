@@ -3,7 +3,7 @@ import os
 
 
 def read_jsonl_files(folder):
-    jsonl_files = [f for f in os.listdir(folder) if f.endswith(".jsonl")]
+    jsonl_files = sorted([f for f in os.listdir(folder) if f.endswith(".jsonl")])
     print(jsonl_files, len(jsonl_files))
     data = {}
     for file in jsonl_files:
@@ -21,6 +21,7 @@ for key, value in data.items():
         d = {
             "INDEX": serial,
             "ABILITY": item["能力\nABILITY"],
+            "ORIGIN_FILE": key,
             "DATA_INDEX": item["序号\nINDEX"],
             "STORY": item["STORY"],
             "QUESTION": item["QUESTION"],
@@ -38,3 +39,4 @@ import pandas as pd
 
 df = pd.DataFrame(refined_data)
 df.to_csv("Data/RefinedData/data.csv", index=False)
+

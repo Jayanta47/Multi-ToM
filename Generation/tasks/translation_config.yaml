@@ -1,7 +1,7 @@
 source_language: English
-target_language: Bangla
-model: gpt-4o
+target_language: Arabic
+model: gpt-3.5-turbo
 secondary_model: gpt-3.5-turbo
 task: translation
 storage_folder_path: ./Results
-data_path: ./Data/RefinedData/data.csv
+data_path: ./Data/RefinedData/data_3.csv
