@@ -39,8 +39,11 @@ class TranslationProcessor(Processor):
         self.logger.info("PROCESSOR: Processing translator output")
         if (
             "<STORY>" in input["content"]
+            and "</STORY>" in input["content"]
             and "<QUESTION>" in input["content"]
+            and "</QUESTION>" in input["content"]
             and "<OPTIONS>" in input["content"]
+            and "</OPTIONS>" in input["content"]
         ):
             status = "success"
         else:

@@ -69,7 +69,7 @@ def executor(
     feedback_enabled: bool = False,
 ):
     logger.info("Starting execution")
-    for data_sample in tqdm(data_handler.return_data_point(20)):
+    for data_sample in tqdm(data_handler.return_data_point()):
         logger.info(f"Processing data sample: {data_sample['INDEX']}")
         translator_response = translator_agent.invoke(input=data_sample)
         logger.debug(f"Translator response: {translator_response}")

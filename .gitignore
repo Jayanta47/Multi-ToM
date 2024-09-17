@@ -4,3 +4,6 @@
 Results/
 logs/
 Data/
+Scripts/*.csv
+Scripts/*.txt
+ResultsCultural/*

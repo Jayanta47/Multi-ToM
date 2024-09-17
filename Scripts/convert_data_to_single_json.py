@@ -40,6 +40,26 @@ for key, value in data.items():
         refined_data.append(d)
         serial += 1
 
+# for key, value in data.items():
+#     for item in value:
+
+#         d = {
+#             "INDEX": serial,
+#             "ABILITY": item.get("能力\nABILITY", None),
+#             "ORIGIN_FILE": key,
+#             "DATA_INDEX": item.get("序号\nINDEX", None),
+#             "STORY": item.get("故事", None),
+#             "QUESTION": item.get("问题", None),
+#             "OPTION-A": item.get("选项A", "nan"),
+#             "OPTION-B": item.get("选项B", "nan"),
+#             "OPTION-C": item.get("选项C", "nan"),  # Use NaN if missing
+#             "OPTION-D": item.get("选项D", "nan"),  # Use NaN if missing
+#             "ANSWER": item.get("答案\nANSWER", None),
+#         }
+
+#         refined_data.append(d)
+#         serial += 1
+
 import pandas as pd
 
 df = pd.DataFrame(refined_data)

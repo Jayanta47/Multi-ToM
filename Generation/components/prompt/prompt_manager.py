@@ -38,17 +38,17 @@ class TranslatorPromptManager(BasePromptManager):
         self.target_language = target_language
         self.agents_sys_prompt = []
         self.agents_sys_prompt.append(
-            SYSTEM_PROMPT_TRANS_AGENT_1.format(
+            SYSTEM_PROMPT_TRANS_AGENT_1_CLT.format(
                 source_language=source_language, destination_language=target_language
             )
         )
         self.agents_sys_prompt.append(
-            SYSTEM_PROMPT_TRANS_AGENT_2.format(
+            SYSTEM_PROMPT_TRANS_AGENT_2_CLT.format(
                 source_language=source_language, destination_language=target_language
             )
         )
         self.agents_sys_prompt.append(
-            SYSTEM_PROMPT_TRANS_AGENT_3.format(
+            SYSTEM_PROMPT_TRANS_AGENT_3_CLT.format(
                 source_language=source_language, destination_language=target_language
             )
         )
