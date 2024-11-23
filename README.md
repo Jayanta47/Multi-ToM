@@ -31,7 +31,7 @@ All the used data are avaialble in the `./Data` folder. The original dataset was
 
 The dataset consists of *502* samples covering *8* tasks and *31* social cognitive abilities in *6* dimensions. Detailed dataset statistics are available in the paper. 
 
-![Nuance injection](Generation/Images/Cultural-nuance-injection.png)
+![Nuance injection](Generation/Images/cultural-nuance-injection.png)
 
 ***Figure**: Process of cultural element induction in a
 discrepant emotions task. The generic story is culturally
